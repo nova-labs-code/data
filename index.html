@@ -133,14 +133,13 @@
             font-size: 16px;
             line-height: 1.75;
             letter-spacing: .03em;
-            white-space: normal;
             word-break: break-all;
             overflow-wrap: anywhere;
         }
 
         .line {
             display: block;
-            max-width: 28ch;
+            max-width: 36ch;
         }
 
         @media (min-width: 600px) {
@@ -186,7 +185,7 @@
         </div>
 
         <div class="card">
-            <div class="label">28 Digit Lines</div>
+            <div class="label">36 Digit Lines</div>
             <div id="lines" class="value">—</div>
         </div>
 
@@ -261,7 +260,7 @@
 
 <script>
     const FILE = "digits.pi.data";
-    const MAX_PER_LINE = 28;
+    const MAX_PER_LINE = 36;
 
     function formatNumber(number) {
         return number.toLocaleString();
@@ -303,9 +302,6 @@
 
             /*
              * Keep only numbers and the decimal point.
-             *
-             * Example:
-             * 3.141592653589793...
              */
             const data =
                 raw.replace(/[^0-9.]/g, "");
@@ -404,8 +400,9 @@
             /*
              * Display π.
              *
-             * Every line contains no more
-             * than 28 characters.
+             * There are NO numbers, indexes,
+             * labels, or counters beside
+             * the lines of digits.
              */
             const output =
                 document.getElementById(
