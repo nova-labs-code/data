@@ -22,40 +22,37 @@
             padding: 0;
             background: #050505;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: monospace;
         }
 
         body {
-            padding: 16px;
+            padding: 12px;
         }
 
         .container {
             width: 100%;
-            max-width: 900px;
-            margin: auto;
+            margin: 0 auto;
         }
 
         h1 {
             margin: 0;
-            font-size: 28px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 26px;
         }
 
         .subtitle {
             color: #777;
-            margin-top: 4px;
-            margin-bottom: 18px;
-            font-family: monospace;
+            margin: 3px 0 14px;
         }
 
         .status {
-            margin-bottom: 14px;
-            padding: 10px 12px;
-            border-radius: 9px;
+            margin-bottom: 12px;
+            padding: 9px 11px;
+            border-radius: 8px;
             background: #0d0d0d;
             border: 1px solid #222;
             color: #888;
-            font-family: monospace;
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .status.loaded {
@@ -69,77 +66,76 @@
         .stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 18px;
+            gap: 7px;
+            margin-bottom: 16px;
         }
 
         .card {
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #202020;
-            border-radius: 10px;
+            border-radius: 9px;
             background: #0a0a0a;
         }
 
         .label {
             color: #666;
-            font-size: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: .08em;
-            margin-bottom: 5px;
+            letter-spacing: .07em;
+            margin-bottom: 4px;
         }
 
         .value {
-            font-family: monospace;
-            font-size: 16px;
-            word-break: break-all;
+            font-size: 15px;
         }
 
         .frequency-title {
-            margin: 22px 0 10px;
-            font-size: 18px;
+            margin: 18px 0 8px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 17px;
         }
 
         .frequency {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-bottom: 22px;
+            gap: 6px;
+            margin-bottom: 18px;
         }
 
         .frequency-card {
             background: #0a0a0a;
             border: 1px solid #202020;
-            border-radius: 10px;
-            padding: 12px 8px;
+            border-radius: 8px;
+            padding: 9px 4px;
             text-align: center;
         }
 
         .digit {
-            font-family: monospace;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
         }
 
         .count {
-            margin-top: 5px;
+            margin-top: 4px;
             color: #999;
-            font-family: monospace;
-            font-size: 12px;
-            word-break: break-all;
+            font-size: 11px;
         }
 
-        .digits {
-            font-family: monospace;
-            font-size: 16px;
-            line-height: 1.75;
-            letter-spacing: .03em;
+        /*
+         * The digits are kept on one continuous line
+         * and wrapped naturally by the browser.
+         *
+         * No fixed character count.
+         * No artificial 32-digit limit.
+         */
+        #digits {
+            width: 100%;
+            font-size: clamp(11px, 2.7vw, 22px);
+            line-height: 1.6;
+            letter-spacing: 0;
             word-break: break-all;
             overflow-wrap: anywhere;
-        }
-
-        .line {
-            display: block;
-            max-width: 33ch;
         }
 
         @media (min-width: 600px) {
@@ -149,10 +145,6 @@
 
             .frequency {
                 grid-template-columns: repeat(10, 1fr);
-            }
-
-            .digits {
-                font-size: 18px;
             }
         }
     </style>
@@ -185,13 +177,13 @@
         </div>
 
         <div class="card">
-            <div class="label">33 Digit Lines</div>
-            <div id="lines" class="value">—</div>
+            <div class="label">File Size</div>
+            <div id="fileSize" class="value">—</div>
         </div>
 
         <div class="card">
-            <div class="label">File Size</div>
-            <div id="fileSize" class="value">—</div>
+            <div class="label">Digit Lines</div>
+            <div id="lines" class="value">—</div>
         </div>
 
     </div>
@@ -254,13 +246,12 @@
 
     </div>
 
-    <div id="digits" class="digits"></div>
+    <div id="digits"></div>
 
 </div>
 
 <script>
     const FILE = "digits.pi.data";
-    const MAX_PER_LINE = 33;
 
     function formatNumber(number) {
         return number.toLocaleString();
@@ -282,14 +273,55 @@
         return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
     }
 
+    function calculateLineCount(text) {
+        const container =
+            document.getElementById("digits");
+
+        const test =
+            document.createElement("span");
+
+        test.style.visibility = "hidden";
+        test.style.position = "absolute";
+        test.style.whiteSpace = "nowrap";
+
+        test.textContent = "0".repeat(1000);
+
+        container.appendChild(test);
+
+        const digitWidth =
+            test.getBoundingClientRect().width / 1000;
+
+        container.removeChild(test);
+
+        if (!digitWidth) {
+            return 0;
+        }
+
+        const availableWidth =
+            container.clientWidth;
+
+        const digitsPerLine =
+            Math.max(
+                1,
+                Math.floor(
+                    availableWidth / digitWidth
+                )
+            );
+
+        return Math.ceil(
+            text.length / digitsPerLine
+        );
+    }
+
     async function loadPi() {
         const status =
             document.getElementById("status");
 
         try {
-            const response = await fetch(FILE, {
-                cache: "no-cache"
-            });
+            const response =
+                await fetch(FILE, {
+                    cache: "no-cache"
+                });
 
             if (!response.ok) {
                 throw new Error(
@@ -301,7 +333,7 @@
                 await response.text();
 
             /*
-             * Keep only numbers and the decimal point.
+             * Keep numbers and decimal point.
              */
             const data =
                 raw.replace(/[^0-9.]/g, "");
@@ -313,7 +345,8 @@
             }
 
             /*
-             * Find the decimal point.
+             * Remove the decimal point for
+             * counting digit occurrences.
              */
             const decimalIndex =
                 data.indexOf(".");
@@ -336,7 +369,7 @@
             }
 
             /*
-             * Basic statistics.
+             * General statistics.
              */
             document.getElementById(
                 "totalDigits"
@@ -349,16 +382,6 @@
                 formatNumber(decimalPlaces);
 
             document.getElementById(
-                "lines"
-            ).textContent =
-                formatNumber(
-                    Math.ceil(
-                        data.length /
-                        MAX_PER_LINE
-                    )
-                );
-
-            document.getElementById(
                 "fileSize"
             ).textContent =
                 formatBytes(
@@ -366,12 +389,10 @@
                 );
 
             /*
-             * Count every digit from 0 through 9.
+             * Count each digit.
              */
-            const counts = [
-                0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0
-            ];
+            const counts =
+                Array(10).fill(0);
 
             for (const character of digits) {
                 const number =
@@ -387,7 +408,7 @@
             }
 
             /*
-             * Display digit frequencies.
+             * Display frequencies.
              */
             for (let i = 0; i <= 9; i++) {
                 document.getElementById(
@@ -398,39 +419,28 @@
             }
 
             /*
-             * Display π.
+             * Display the actual π data.
              *
-             * There are NO numbers, indexes,
-             * labels, or counters beside
-             * the lines of digits.
+             * Nothing is manually split here.
+             * The browser uses the full width
+             * available and wraps naturally.
              */
-            const output =
+            document.getElementById(
+                "digits"
+            ).textContent = data;
+
+            /*
+             * Calculate approximate number
+             * of visible lines.
+             */
+            requestAnimationFrame(() => {
                 document.getElementById(
-                    "digits"
-                );
-
-            output.innerHTML = "";
-
-            for (
-                let i = 0;
-                i < data.length;
-                i += MAX_PER_LINE
-            ) {
-                const line =
-                    document.createElement(
-                        "span"
+                    "lines"
+                ).textContent =
+                    formatNumber(
+                        calculateLineCount(data)
                     );
-
-                line.className = "line";
-
-                line.textContent =
-                    data.slice(
-                        i,
-                        i + MAX_PER_LINE
-                    );
-
-                output.appendChild(line);
-            }
+            });
 
             status.textContent =
                 "Loaded successfully";
@@ -447,10 +457,6 @@
 
             status.className =
                 "status error";
-
-            document.getElementById(
-                "digits"
-            ).textContent = "";
         }
     }
 
