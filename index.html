@@ -8,7 +8,7 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <title>Pi Data Viewer</title>
+    <title>Pi Data</title>
 
     <style>
         * {
@@ -20,39 +20,42 @@
         body {
             margin: 0;
             padding: 0;
-            min-height: 100%;
             background: #050505;
             color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         body {
-            padding: 18px;
+            padding: 16px;
         }
 
         .container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 900px;
             margin: auto;
         }
 
         h1 {
-            margin: 0 0 6px;
+            margin: 0;
             font-size: 28px;
         }
 
         .subtitle {
-            color: #888;
-            margin-bottom: 20px;
+            color: #777;
+            margin-top: 4px;
+            margin-bottom: 18px;
+            font-family: monospace;
         }
 
         .status {
-            padding: 12px;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 9px;
+            background: #0d0d0d;
             border: 1px solid #222;
-            border-radius: 10px;
-            background: #0b0b0b;
-            margin-bottom: 16px;
+            color: #888;
             font-family: monospace;
+            font-size: 13px;
         }
 
         .status.loaded {
@@ -65,104 +68,92 @@
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 18px;
         }
 
         .card {
-            background: #0b0b0b;
-            border: 1px solid #222;
-            border-radius: 12px;
-            padding: 14px;
+            padding: 12px;
+            border: 1px solid #202020;
+            border-radius: 10px;
+            background: #0a0a0a;
         }
 
         .label {
-            color: #777;
-            font-size: 12px;
+            color: #666;
+            font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 6px;
+            letter-spacing: .08em;
+            margin-bottom: 5px;
         }
 
         .value {
-            font-size: 20px;
-            font-weight: 600;
-            word-break: break-word;
+            font-family: monospace;
+            font-size: 16px;
+            word-break: break-all;
         }
 
-        .section {
-            margin-top: 20px;
-        }
-
-        .section h2 {
+        .frequency-title {
+            margin: 22px 0 10px;
             font-size: 18px;
-            margin: 0 0 10px;
+        }
+
+        .frequency {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+
+        .frequency-card {
+            background: #0a0a0a;
+            border: 1px solid #202020;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .digit {
+            font-family: monospace;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .count {
+            margin-top: 5px;
+            color: #999;
+            font-family: monospace;
+            font-size: 12px;
+            word-break: break-all;
         }
 
         .digits {
-            background: #000;
-            border: 1px solid #222;
-            border-radius: 12px;
-            padding: 14px;
-            overflow: hidden;
-        }
-
-        .digit-line {
-            display: block;
-            width: 100%;
-            max-width: 32ch;
-            overflow-wrap: anywhere;
-            word-break: break-all;
-            font-size: 16px;
-            line-height: 1.8;
-            letter-spacing: 0.04em;
-        }
-
-        .chunk {
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        .chunk-number {
-            display: inline-block;
-            width: 55px;
-            color: #555;
-            user-select: none;
-        }
-
-        .preview {
             font-family: monospace;
+            font-size: 16px;
+            line-height: 1.75;
+            letter-spacing: .03em;
+            white-space: normal;
             word-break: break-all;
             overflow-wrap: anywhere;
-            line-height: 1.7;
         }
 
-        .warning {
-            color: #aaa;
-            font-size: 13px;
-            margin-top: 8px;
+        .line {
+            display: block;
+            max-width: 32ch;
         }
 
-        @media (max-width: 500px) {
-            body {
-                padding: 12px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
-
+        @media (min-width: 600px) {
             .stats {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(4, 1fr);
             }
 
-            .value {
-                font-size: 17px;
+            .frequency {
+                grid-template-columns: repeat(10, 1fr);
             }
 
-            .digit-line {
-                font-size: 14px;
+            .digits {
+                font-size: 18px;
             }
         }
     </style>
@@ -172,13 +163,14 @@
 
 <div class="container">
 
-    <h1>π Data Viewer</h1>
+    <h1>π Data</h1>
+
     <div class="subtitle">
-        Reading digits from <code>digits.pi.data</code>
+        digits.pi.data
     </div>
 
     <div id="status" class="status">
-        Loading pi data...
+        Loading...
     </div>
 
     <div class="stats">
@@ -194,13 +186,8 @@
         </div>
 
         <div class="card">
-            <div class="label">Integer Digits</div>
-            <div id="integerDigits" class="value">—</div>
-        </div>
-
-        <div class="card">
-            <div class="label">Digit Chunks</div>
-            <div id="chunkCount" class="value">—</div>
+            <div class="label">32 Digit Lines</div>
+            <div id="lines" class="value">—</div>
         </div>
 
         <div class="card">
@@ -208,136 +195,76 @@
             <div id="fileSize" class="value">—</div>
         </div>
 
-        <div class="card">
-            <div class="label">32-Digit Lines</div>
-            <div id="lineCount" class="value">—</div>
+    </div>
+
+    <h2 class="frequency-title">
+        Digit Frequency
+    </h2>
+
+    <div class="frequency">
+
+        <div class="frequency-card">
+            <div class="digit">0</div>
+            <div id="count0" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">1</div>
+            <div id="count1" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">2</div>
+            <div id="count2" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">3</div>
+            <div id="count3" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">4</div>
+            <div id="count4" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">5</div>
+            <div id="count5" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">6</div>
+            <div id="count6" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">7</div>
+            <div id="count7" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">8</div>
+            <div id="count8" class="count">—</div>
+        </div>
+
+        <div class="frequency-card">
+            <div class="digit">9</div>
+            <div id="count9" class="count">—</div>
         </div>
 
     </div>
 
-    <div class="section">
-
-        <h2>Pi Information</h2>
-
-        <div class="stats">
-
-            <div class="card">
-                <div class="label">Value Begins</div>
-                <div id="startsWith" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">Value Ends</div>
-                <div id="endsWith" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">Longest Possible Line</div>
-                <div class="value">32 digits</div>
-            </div>
-
-            <div class="card">
-                <div class="label">Source</div>
-                <div class="value">digits.pi.data</div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="section">
-
-        <h2>Digit Distribution</h2>
-
-        <div class="stats">
-
-            <div class="card">
-                <div class="label">0</div>
-                <div id="count0" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">1</div>
-                <div id="count1" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">2</div>
-                <div id="count2" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">3</div>
-                <div id="count3" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">4</div>
-                <div id="count4" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">5</div>
-                <div id="count5" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">6</div>
-                <div id="count6" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">7</div>
-                <div id="count7" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">8</div>
-                <div id="count8" class="value">—</div>
-            </div>
-
-            <div class="card">
-                <div class="label">9</div>
-                <div id="count9" class="value">—</div>
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="section">
-
-        <h2>Preview</h2>
-
-        <div class="digits">
-            <div class="label">First 256 digits</div>
-            <div id="preview" class="preview">—</div>
-        </div>
-
-    </div>
-
-    <div class="section">
-
-        <h2>Digits</h2>
-
-        <div class="digits" id="digits">
-            Loading...
-        </div>
-
-        <div class="warning">
-            Each displayed line is limited to a maximum of 32 digits.
-        </div>
-
-    </div>
+    <div id="digits" class="digits"></div>
 
 </div>
 
 <script>
-    const DATA_FILE = "digits.pi.data";
-    const MAX_DIGITS_PER_LINE = 32;
+    const FILE = "digits.pi.data";
+    const MAX_PER_LINE = 32;
 
     function formatNumber(number) {
-        return Number(number).toLocaleString();
+        return number.toLocaleString();
     }
 
     function formatBytes(bytes) {
@@ -356,209 +283,157 @@
         return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
     }
 
-    function splitIntoChunks(text, size) {
-        const chunks = [];
-
-        for (let i = 0; i < text.length; i += size) {
-            chunks.push(text.slice(i, i + size));
-        }
-
-        return chunks;
-    }
-
-    function displayChunks(element, digits) {
-        element.innerHTML = "";
-
-        const chunks = splitIntoChunks(
-            digits,
-            MAX_DIGITS_PER_LINE
-        );
-
-        chunks.forEach((chunk, index) => {
-            const row = document.createElement("div");
-            row.className = "chunk";
-
-            const number = document.createElement("span");
-            number.className = "chunk-number";
-            number.textContent =
-                (index * MAX_DIGITS_PER_LINE + 1).toLocaleString();
-
-            const value = document.createElement("span");
-            value.className = "digit-line";
-            value.textContent = chunk;
-
-            row.appendChild(number);
-            row.appendChild(value);
-
-            element.appendChild(row);
-        });
-
-        return chunks.length;
-    }
-
     async function loadPi() {
-        const status = document.getElementById("status");
+        const status =
+            document.getElementById("status");
 
         try {
-            const response = await fetch(DATA_FILE, {
+            const response = await fetch(FILE, {
                 cache: "no-cache"
             });
 
             if (!response.ok) {
                 throw new Error(
-                    "HTTP " + response.status
+                    "File could not be loaded."
                 );
             }
 
-            const rawData = await response.text();
+            const raw =
+                await response.text();
 
             /*
-             * Keep only the digits and decimal point.
-             * This allows the file to contain:
+             * Keep only numbers and the decimal point.
              *
-             * 3.1415926535...
-             *
-             * while ignoring spaces, line breaks, etc.
+             * Example:
+             * 3.141592653589793...
              */
-            const cleaned = rawData.replace(/[^0-9.]/g, "");
+            const data =
+                raw.replace(/[^0-9.]/g, "");
 
-            if (!cleaned) {
-                throw new Error("The file contains no data.");
+            if (!data) {
+                throw new Error(
+                    "No digits found."
+                );
             }
 
             /*
-             * Separate the integer and decimal portions.
+             * Find the decimal point.
              */
-            const decimalIndex = cleaned.indexOf(".");
+            const decimalIndex =
+                data.indexOf(".");
 
-            let integerPart;
-            let decimalPart;
+            let digits;
+            let decimalPlaces;
 
             if (decimalIndex === -1) {
-                integerPart = cleaned;
-                decimalPart = "";
+                digits = data;
+                decimalPlaces = 0;
             } else {
-                integerPart = cleaned.slice(0, decimalIndex);
-                decimalPart = cleaned.slice(decimalIndex + 1);
+                digits =
+                    data.slice(0, decimalIndex) +
+                    data.slice(decimalIndex + 1);
+
+                decimalPlaces =
+                    data.length -
+                    decimalIndex -
+                    1;
             }
 
             /*
-             * The actual digit data does not include the decimal point.
+             * Basic statistics.
              */
-            const allDigits =
-                integerPart + decimalPart;
+            document.getElementById(
+                "totalDigits"
+            ).textContent =
+                formatNumber(digits.length);
+
+            document.getElementById(
+                "decimalDigits"
+            ).textContent =
+                formatNumber(decimalPlaces);
+
+            document.getElementById(
+                "lines"
+            ).textContent =
+                formatNumber(
+                    Math.ceil(
+                        data.length /
+                        MAX_PER_LINE
+                    )
+                );
+
+            document.getElementById(
+                "fileSize"
+            ).textContent =
+                formatBytes(
+                    new Blob([raw]).size
+                );
 
             /*
-             * Count every digit.
+             * Count every digit from 0 through 9.
              */
             const counts = [
                 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0
             ];
 
-            for (const digit of allDigits) {
-                counts[Number(digit)]++;
+            for (const character of digits) {
+                const number =
+                    Number(character);
+
+                if (
+                    Number.isInteger(number) &&
+                    number >= 0 &&
+                    number <= 9
+                ) {
+                    counts[number]++;
+                }
             }
 
             /*
-             * Update statistics.
-             */
-            document.getElementById("totalDigits").textContent =
-                formatNumber(allDigits.length);
-
-            document.getElementById("decimalDigits").textContent =
-                formatNumber(decimalPart.length);
-
-            document.getElementById("integerDigits").textContent =
-                formatNumber(integerPart.length);
-
-            const digitChunks =
-                Math.ceil(allDigits.length / MAX_DIGITS_PER_LINE);
-
-            document.getElementById("chunkCount").textContent =
-                formatNumber(digitChunks);
-
-            document.getElementById("lineCount").textContent =
-                formatNumber(digitChunks);
-
-            document.getElementById("fileSize").textContent =
-                formatBytes(
-                    new Blob([rawData]).size
-                );
-
-            /*
-             * Beginning and ending previews.
-             */
-            document.getElementById("startsWith").textContent =
-                cleaned.slice(0, 32);
-
-            document.getElementById("endsWith").textContent =
-                cleaned.slice(-32);
-
-            /*
-             * Digit distribution.
+             * Display digit frequencies.
              */
             for (let i = 0; i <= 9; i++) {
                 document.getElementById(
                     "count" + i
-                ).textContent = formatNumber(counts[i]);
+                ).textContent =
+                    formatNumber(counts[i]) +
+                    " times";
             }
 
             /*
-             * Preview.
-             */
-            document.getElementById("preview").textContent =
-                cleaned.slice(0, 256);
-
-            /*
-             * Main digit display.
+             * Display π.
              *
-             * The decimal point is displayed with the first
-             * digit chunk, but every individual line remains
-             * at or below 32 characters.
+             * Every line contains no more
+             * than 32 characters.
              */
-            const digitDisplay =
-                document.getElementById("digits");
-
-            digitDisplay.innerHTML = "";
-
-            const firstPart =
-                integerPart + "." + decimalPart;
-
-            const chunks =
-                splitIntoChunks(
-                    firstPart,
-                    MAX_DIGITS_PER_LINE
+            const output =
+                document.getElementById(
+                    "digits"
                 );
 
-            chunks.forEach((chunk, index) => {
-                const row =
-                    document.createElement("div");
+            output.innerHTML = "";
 
-                row.className = "chunk";
+            for (
+                let i = 0;
+                i < data.length;
+                i += MAX_PER_LINE
+            ) {
+                const line =
+                    document.createElement(
+                        "span"
+                    );
 
-                const number =
-                    document.createElement("span");
+                line.className = "line";
 
-                number.className = "chunk-number";
+                line.textContent =
+                    data.slice(
+                        i,
+                        i + MAX_PER_LINE
+                    );
 
-                number.textContent =
-                    (
-                        index * MAX_DIGITS_PER_LINE + 1
-                    ).toLocaleString();
-
-                const value =
-                    document.createElement("span");
-
-                value.className = "digit-line";
-
-                value.textContent = chunk;
-
-                row.appendChild(number);
-                row.appendChild(value);
-
-                digitDisplay.appendChild(row);
-            });
+                output.appendChild(line);
+            }
 
             status.textContent =
                 "Loaded successfully";
@@ -571,13 +446,14 @@
             console.error(error);
 
             status.textContent =
-                "Could not load " + DATA_FILE;
+                "Unable to load digits.pi.data";
 
             status.className =
                 "status error";
 
-            document.getElementById("digits").textContent =
-                "No pi data available.";
+            document.getElementById(
+                "digits"
+            ).textContent = "";
         }
     }
 
