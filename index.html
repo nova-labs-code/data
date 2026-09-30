@@ -22,11 +22,11 @@
             padding: 0;
             background: #050505;
             color: #fff;
-            font-family: monospace;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         body {
-            padding: 12px;
+            padding: 14px;
         }
 
         .container {
@@ -36,13 +36,14 @@
 
         h1 {
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            font-size: 26px;
+            font-size: 28px;
         }
 
         .subtitle {
             color: #777;
-            margin: 3px 0 14px;
+            margin-top: 3px;
+            margin-bottom: 15px;
+            font-family: monospace;
         }
 
         .status {
@@ -52,6 +53,7 @@
             background: #0d0d0d;
             border: 1px solid #222;
             color: #888;
+            font-family: monospace;
             font-size: 12px;
         }
 
@@ -67,7 +69,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 7px;
-            margin-bottom: 16px;
+            margin-bottom: 17px;
         }
 
         .card {
@@ -79,7 +81,6 @@
 
         .label {
             color: #666;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             font-size: 9px;
             text-transform: uppercase;
             letter-spacing: .07em;
@@ -87,12 +88,12 @@
         }
 
         .value {
+            font-family: monospace;
             font-size: 15px;
         }
 
         .frequency-title {
             margin: 18px 0 8px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             font-size: 17px;
         }
 
@@ -112,39 +113,48 @@
         }
 
         .digit {
-            font-size: 28px;
+            font-family: monospace;
+            font-size: 20px;
             font-weight: bold;
         }
 
         .count {
             margin-top: 4px;
             color: #999;
-            font-size: 11px;
+            font-family: monospace;
+            font-size: 10px;
+            word-break: break-word;
         }
 
         /*
-         * The digits are kept on one continuous line
-         * and wrapped naturally by the browser.
+         * LARGE PI DIGITS
          *
-         * No fixed character count.
-         * No artificial 32-digit limit.
+         * The font is significantly larger than before.
+         * It still scales slightly with screen width.
          */
         #digits {
             width: 100%;
-            font-size: clamp(11px, 2.7vw, 22px);
-            line-height: 1.6;
+            font-family: monospace;
+            font-size: clamp(18px, 5vw, 38px);
+            font-weight: 500;
+            line-height: 1.45;
             letter-spacing: 0;
             word-break: break-all;
             overflow-wrap: anywhere;
         }
 
         @media (min-width: 600px) {
+
             .stats {
                 grid-template-columns: repeat(4, 1fr);
             }
 
             .frequency {
                 grid-template-columns: repeat(10, 1fr);
+            }
+
+            #digits {
+                font-size: clamp(24px, 3vw, 42px);
             }
         }
     </style>
@@ -258,22 +268,33 @@
     }
 
     function formatBytes(bytes) {
+
         if (bytes < 1024) {
             return bytes + " B";
         }
 
         if (bytes < 1024 * 1024) {
-            return (bytes / 1024).toFixed(2) + " KB";
+            return (
+                (bytes / 1024).toFixed(2) +
+                " KB"
+            );
         }
 
         if (bytes < 1024 * 1024 * 1024) {
-            return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+            return (
+                (bytes / (1024 * 1024)).toFixed(2) +
+                " MB"
+            );
         }
 
-        return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB";
+        return (
+            (bytes / (1024 * 1024 * 1024)).toFixed(2) +
+            " GB"
+        );
     }
 
     function calculateLineCount(text) {
+
         const container =
             document.getElementById("digits");
 
@@ -283,15 +304,17 @@
         test.style.visibility = "hidden";
         test.style.position = "absolute";
         test.style.whiteSpace = "nowrap";
+        test.style.font =
+            getComputedStyle(container).font;
 
         test.textContent = "0".repeat(1000);
 
-        container.appendChild(test);
+        document.body.appendChild(test);
 
         const digitWidth =
             test.getBoundingClientRect().width / 1000;
 
-        container.removeChild(test);
+        test.remove();
 
         if (!digitWidth) {
             return 0;
@@ -304,20 +327,24 @@
             Math.max(
                 1,
                 Math.floor(
-                    availableWidth / digitWidth
+                    availableWidth /
+                    digitWidth
                 )
             );
 
         return Math.ceil(
-            text.length / digitsPerLine
+            text.length /
+            digitsPerLine
         );
     }
 
     async function loadPi() {
+
         const status =
             document.getElementById("status");
 
         try {
+
             const response =
                 await fetch(FILE, {
                     cache: "no-cache"
@@ -333,7 +360,8 @@
                 await response.text();
 
             /*
-             * Keep numbers and decimal point.
+             * Keep only numbers and the
+             * decimal point.
              */
             const data =
                 raw.replace(/[^0-9.]/g, "");
@@ -345,8 +373,8 @@
             }
 
             /*
-             * Remove the decimal point for
-             * counting digit occurrences.
+             * Separate the decimal point
+             * from the actual digits.
              */
             const decimalIndex =
                 data.indexOf(".");
@@ -355,9 +383,12 @@
             let decimalPlaces;
 
             if (decimalIndex === -1) {
+
                 digits = data;
                 decimalPlaces = 0;
+
             } else {
+
                 digits =
                     data.slice(0, decimalIndex) +
                     data.slice(decimalIndex + 1);
@@ -369,17 +400,21 @@
             }
 
             /*
-             * General statistics.
+             * Basic information.
              */
             document.getElementById(
                 "totalDigits"
             ).textContent =
-                formatNumber(digits.length);
+                formatNumber(
+                    digits.length
+                );
 
             document.getElementById(
                 "decimalDigits"
             ).textContent =
-                formatNumber(decimalPlaces);
+                formatNumber(
+                    decimalPlaces
+                );
 
             document.getElementById(
                 "fileSize"
@@ -389,12 +424,13 @@
                 );
 
             /*
-             * Count each digit.
+             * Count every digit.
              */
             const counts =
                 Array(10).fill(0);
 
             for (const character of digits) {
+
                 const number =
                     Number(character);
 
@@ -408,38 +444,46 @@
             }
 
             /*
-             * Display frequencies.
+             * Display frequency.
              */
             for (let i = 0; i <= 9; i++) {
+
                 document.getElementById(
                     "count" + i
                 ).textContent =
-                    formatNumber(counts[i]) +
+                    formatNumber(
+                        counts[i]
+                    ) +
                     " times";
             }
 
             /*
-             * Display the actual π data.
+             * Display π.
              *
-             * Nothing is manually split here.
-             * The browser uses the full width
-             * available and wraps naturally.
+             * The browser automatically uses
+             * the available width and wraps the
+             * continuous digit stream.
              */
-            document.getElementById(
-                "digits"
-            ).textContent = data;
+            const digitDisplay =
+                document.getElementById(
+                    "digits"
+                );
+
+            digitDisplay.textContent =
+                data;
 
             /*
-             * Calculate approximate number
-             * of visible lines.
+             * Calculate the number of visual lines.
              */
             requestAnimationFrame(() => {
+
                 document.getElementById(
                     "lines"
                 ).textContent =
                     formatNumber(
                         calculateLineCount(data)
                     );
+
             });
 
             status.textContent =
@@ -457,10 +501,15 @@
 
             status.className =
                 "status error";
+
+            document.getElementById(
+                "digits"
+            ).textContent = "";
         }
     }
 
     loadPi();
+
 </script>
 
 </body>
